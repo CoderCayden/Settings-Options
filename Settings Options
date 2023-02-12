@@ -1,0 +1,129 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+public class SettingsMenu : MonoBehaviour
+{
+    // Declare references to the UI elements
+    public TMP_Dropdown resolutionDropdown;
+    public Toggle vSyncToggle;
+    public Toggle ambientOcclusionToggle;
+    public Toggle anisotropicFilteringToggle;
+    public Toggle highDynamicRangeToggle;
+    public Toggle bloomToggle;
+    public Toggle motionBlurToggle;
+    public Slider fieldOfViewSlider;
+    public Toggle fullscreenToggle;
+    public Slider soundVolumeSlider;
+    public Button applyButton;
+
+    // Declare a list to store the available screen resolutions
+    private Resolution[] resolutions;
+
+    private void Start()
+    {
+        // Fill the list of resolutions with the available options
+        resolutions = Screen.resolutions;
+        resolutionDropdown.ClearOptions();
+
+        // Create a list of strings to represent the options in the dropdown
+        List<string> options = new List<string>();
+        int currentResolutionIndex = 0;
+        for (int i = 0; i < resolutions.Length; i++)
+        {
+            string option = resolutions[i].width + " x " + resolutions[i].height;
+            options.Add(option);
+
+            // Check if this is the current resolution
+            if (resolutions[i].width == Screen.currentResolution.width &&
+                resolutions[i].height == Screen.currentResolution.height)
+            {
+                currentResolutionIndex = i;
+            }
+        }
+
+        // Add the options to the dropdown and set the current resolution
+        resolutionDropdown.AddOptions(options);
+        resolutionDropdown.value = currentResolutionIndex;
+        resolutionDropdown.RefreshShownValue();
+
+        // Load the previous settings from player preferences and set the UI elements accordingly
+        vSyncToggle.isOn = QualitySettings.vSyncCount > 0;
+        ambientOcclusionToggle.isOn = PlayerPrefs.GetInt("AmbientOcclusionEnabled", 1) == 1;
+        anisotropicFilteringToggle.isOn = PlayerPrefs.GetInt("AnisotropicFilteringEnabled", 1) == 1;
+        highDynamicRangeToggle.isOn = PlayerPrefs.GetInt("HighDynamicRangeEnabled", 1) == 1;
+        bloomToggle.isOn = PlayerPrefs.GetInt("BloomEnabled", 1) == 1;
+        motionBlurToggle.isOn = PlayerPrefs.GetInt("MotionBlurEnabled", 1) == 1;
+        fieldOfViewSlider.value = PlayerPrefs.GetFloat("FieldOfView", 60);
+        fullscreenToggle.isOn = PlayerPrefs.GetInt("FullscreenEnabled", 1) == 1;
+        soundVolumeSlider.value = PlayerPrefs.GetFloat("SoundVolume", 1);
+
+        // Add listeners to the UI elements to detect changes and apply the corresponding changes
+        resolutionDropdown.onValueChanged.AddListener(delegate { OnResolutionChange(); });
+        vSyncToggle.onValueChanged.AddListener(delegate { OnVSyncChange(); });
+        ambientOcclusionToggle.onValueChanged.AddListener(delegate { OnAmbientOcclusionChange(); });
+        anisotropicFilteringToggle.onValueChanged.AddListener(delegate { OnAnisotropicFilteringChange(); });
+        highDynamicRangeToggle.onValueChanged.AddListener(delegate { OnHighDynamicRangeChange(); });
+        bloomToggle.onValueChanged.AddListener(delegate { OnBloomChange(); });
+        motionBlurToggle.onValueChanged.AddListener(delegate { OnMotionBlurChange(); });
+        fieldOfViewSlider.onValueChanged.AddListener(delegate { OnFieldOfViewChange(); });
+        fullscreenToggle.onValueChanged.AddListener(delegate { OnFullscreenChange(); });
+        soundVolumeSlider.onValueChanged.AddListener(delegate { OnSoundVolumeChange(); });
+        applyButton.onClick.AddListener(delegate { OnApplyClick(); });
+    }
+    private void OnResolutionChange()
+    {
+        Screen.SetResolution(resolutions[resolutionDropdown.value].width, resolutions[resolutionDropdown.value].height, Screen.fullScreen);
+    }
+
+    private void OnVSyncChange()
+    {
+        QualitySettings.vSyncCount = vSyncToggle.isOn ? 1 : 0;
+    }
+
+    private void OnAmbientOcclusionChange()
+    {
+        PlayerPrefs.SetInt("AmbientOcclusionEnabled", ambientOcclusionToggle.isOn ? 1 : 0);
+    }
+
+    private void OnAnisotropicFilteringChange()
+    {
+        PlayerPrefs.SetInt("AnisotropicFilteringEnabled", anisotropicFilteringToggle.isOn ? 1 : 0);
+    }
+
+    private void OnHighDynamicRangeChange()
+    {
+        PlayerPrefs.SetInt("HighDynamicRangeEnabled", highDynamicRangeToggle.isOn ? 1 : 0);
+    }
+
+    private void OnBloomChange()
+    {
+        PlayerPrefs.SetInt("BloomEnabled", bloomToggle.isOn ? 1 : 0);
+    }
+
+    private void OnMotionBlurChange()
+    {
+        PlayerPrefs.SetInt("MotionBlurEnabled", motionBlurToggle.isOn ? 1 : 0);
+    }
+
+    private void OnFieldOfViewChange()
+    {
+        PlayerPrefs.SetFloat("FieldOfView", fieldOfViewSlider.value);
+    }
+
+    private void OnFullscreenChange()
+    {
+        Screen.fullScreen = fullscreenToggle.isOn;
+    }
+
+    private void OnSoundVolumeChange()
+    {
+        PlayerPrefs.SetFloat("SoundVolume", soundVolumeSlider.value);
+    }
+
+    private void OnApplyClick()
+    {
+        PlayerPrefs.Save();
+    }
+}
